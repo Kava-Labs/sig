@@ -78,16 +78,25 @@ export interface StdSignature {
  * An unsigned transaction.
  */
 export interface Tx {
+    type: string;
+    value: {
     msg: Msg[];
     fee: StdFee;
     memo: string;
+    };
 }
 
 /**
  * A signed transaction.
  */
 export interface StdTx extends Tx {
+    type: string;
+    value: {
+    msg: Msg[];
+    fee: StdFee;
+    memo: string;
     signatures: StdSignature[];
+    };
 }
 
 /**
