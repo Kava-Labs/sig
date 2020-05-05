@@ -1,53 +1,37 @@
 import {
-    base64ToBytes,
-    bytesToBase64,
-    toCanonicalJSONBytes
+  base64ToBytes,
+  bytesToBase64,
+  toCanonicalJSONBytes,
 } from '@tendermint/belt';
 
-import {
-    Bech32String,
-    Bytes
-} from '@tendermint/types';
+import { Bech32String, Bytes } from '@tendermint/types';
 
-import {
-    encode as bech32Encode,
-    toWords as bech32ToWords
-} from 'bech32';
+import { encode as bech32Encode, toWords as bech32ToWords } from 'bech32';
 
-import {
-    BIP32Interface,
-    fromSeed as bip32FromSeed
-} from 'bip32';
+import { BIP32Interface, fromSeed as bip32FromSeed } from 'bip32';
 
 import { mnemonicToSeedSync as bip39MnemonicToSeed } from 'bip39';
 
 import {
-    publicKeyCreate as secp256k1PublicKeyCreate,
-    sign as secp256k1Sign,
-    verify as secp256k1Verify
+  publicKeyCreate as secp256k1PublicKeyCreate,
+  sign as secp256k1Sign,
+  verify as secp256k1Verify,
 } from 'secp256k1';
 
-import {
-    COSMOS_PREFIX,
-    COSMOS_PATH,
-    BROADCAST_MODE_SYNC
-} from './constants';
+import { COSMOS_PREFIX, COSMOS_PATH, BROADCAST_MODE_SYNC } from './constants';
+
+import { ripemd160, sha256 } from './hash';
 
 import {
-    ripemd160,
-    sha256
-} from './hash';
-
-import {
-    BroadcastMode,
-    BroadcastTx,
-    KeyPair,
-    StdSignature,
-    StdSignMsg,
-    StdTx,
-    Tx,
-    SignMeta,
-    Wallet
+  BroadcastMode,
+  BroadcastTx,
+  KeyPair,
+  StdSignature,
+  StdSignMsg,
+  StdTx,
+  Tx,
+  SignMeta,
+  Wallet,
 } from './types';
 
 /**
@@ -61,10 +45,15 @@ import {
  * @returns a keypair and address derived from the provided mnemonic
  * @throws  will throw if the provided mnemonic is invalid
  */
-export function createWalletFromMnemonic (mnemonic: string, password?: string, prefix: string = COSMOS_PREFIX, path: string = COSMOS_PATH): Wallet {
-    const masterKey = createMasterKeyFromMnemonic(mnemonic, password);
+export function createWalletFromMnemonic(
+  mnemonic: string,
+  password?: string,
+  prefix: string = COSMOS_PREFIX,
+  path: string = COSMOS_PATH
+): Wallet {
+  const masterKey = createMasterKeyFromMnemonic(mnemonic, password);
 
-    return createWalletFromMasterKey(masterKey, prefix, path);
+  return createWalletFromMasterKey(masterKey, prefix, path);
 }
 
 /**
@@ -76,10 +65,13 @@ export function createWalletFromMnemonic (mnemonic: string, password?: string, p
  * @returns BIP32 master key
  * @throws  will throw if the provided mnemonic is invalid
  */
-export function createMasterKeyFromMnemonic (mnemonic: string, password?: string): BIP32Interface {
-    const seed = bip39MnemonicToSeed(mnemonic, password);
+export function createMasterKeyFromMnemonic(
+  mnemonic: string,
+  password?: string
+): BIP32Interface {
+  const seed = bip39MnemonicToSeed(mnemonic, password);
 
-    return bip32FromSeed(seed);
+  return bip32FromSeed(seed);
 }
 
 /**
@@ -91,16 +83,20 @@ export function createMasterKeyFromMnemonic (mnemonic: string, password?: string
  *
  * @returns a keypair and address derived from the provided master key
  */
-export function createWalletFromMasterKey (masterKey: BIP32Interface, prefix: string = COSMOS_PREFIX, path: string = COSMOS_PATH): Wallet {
-    const { privateKey, publicKey } = createKeyPairFromMasterKey(masterKey, path);
+export function createWalletFromMasterKey(
+  masterKey: BIP32Interface,
+  prefix: string = COSMOS_PREFIX,
+  path: string = COSMOS_PATH
+): Wallet {
+  const { privateKey, publicKey } = createKeyPairFromMasterKey(masterKey, path);
 
-    const address = createAddress(publicKey, prefix);
+  const address = createAddress(publicKey, prefix);
 
-    return {
-        privateKey,
-        publicKey,
-        address
-    };
+  return {
+    privateKey,
+    publicKey,
+    address,
+  };
 }
 
 /**
@@ -112,18 +108,21 @@ export function createWalletFromMasterKey (masterKey: BIP32Interface, prefix: st
  * @returns derived public and private key pair
  * @throws  will throw if a private key cannot be derived
  */
-export function createKeyPairFromMasterKey (masterKey: BIP32Interface, path: string = COSMOS_PATH): KeyPair {
-    const { privateKey } = masterKey.derivePath(path);
-    if (!privateKey) {
-        throw new Error('could not derive private key');
-    }
+export function createKeyPairFromMasterKey(
+  masterKey: BIP32Interface,
+  path: string = COSMOS_PATH
+): KeyPair {
+  const { privateKey } = masterKey.derivePath(path);
+  if (!privateKey) {
+    throw new Error('could not derive private key');
+  }
 
-    const publicKey = secp256k1PublicKeyCreate(privateKey, true);
+  const publicKey = secp256k1PublicKeyCreate(privateKey, true);
 
-    return {
-        privateKey,
-        publicKey
-    };
+  return {
+    privateKey,
+    publicKey,
+  };
 }
 
 /**
@@ -134,12 +133,15 @@ export function createKeyPairFromMasterKey (masterKey: BIP32Interface, path: str
  *
  * @returns Bech32-encoded address
  */
-export function createAddress (publicKey: Bytes, prefix: string = COSMOS_PREFIX): Bech32String {
-    const hash1 = sha256(publicKey);
-    const hash2 = ripemd160(hash1);
-    const words = bech32ToWords(hash2);
+export function createAddress(
+  publicKey: Bytes,
+  prefix: string = COSMOS_PREFIX
+): Bech32String {
+  const hash1 = sha256(publicKey);
+  const hash2 = ripemd160(hash1);
+  const words = bech32ToWords(hash2);
 
-    return bech32Encode(prefix, words);
+  return bech32Encode(prefix, words);
 }
 
 /**
@@ -155,15 +157,28 @@ export function createAddress (publicKey: Bytes, prefix: string = COSMOS_PREFIX)
  *
  * @returns a signed transaction
  */
-export function signTx (tx: Tx | StdTx, meta: SignMeta, keyPair: KeyPair): StdTx {
-    const signMsg    = createSignMsg(tx, meta);
-    const signature  = createSignature(signMsg, keyPair);
-    const signatures = ('signatures' in tx) ? [...tx.signatures, signature] : [signature];
+export function signTx(
+  tx: Tx | StdTx,
+  meta: SignMeta,
+  keyPair: KeyPair
+): StdTx {
+  const signMsg = createSignMsg(tx, meta);
+  const signature = createSignature(signMsg, keyPair);
 
-    return {
-        ...tx,
-        signatures
-    };
+  const signatures =
+    'signatures' in tx.value && tx.value.signatures !== null
+      ? [...tx.value.signatures, signature]
+      : [signature];
+
+  return {
+    type: tx.type,
+    value: {
+      msg: tx.value.msg,
+      fee: tx.value.fee,
+      memo: tx.value.memo,
+      signatures: signatures,
+    },
+  }
 }
 
 /**
@@ -174,15 +189,16 @@ export function signTx (tx: Tx | StdTx, meta: SignMeta, keyPair: KeyPair): StdTx
  *
  * @returns a transaction with metadata for signing
  */
-export function createSignMsg (tx: Tx, meta: SignMeta): StdSignMsg {
-    return {
-        account_number: meta.account_number,
-        chain_id:       meta.chain_id,
-        fee:            tx.fee,
-        memo:           tx.memo,
-        msgs:           tx.msg,
-        sequence:       meta.sequence
-    };
+export function createSignMsg(tx: Tx, meta: SignMeta): StdSignMsg {
+
+  return {
+    account_number: meta.account_number,
+    chain_id: meta.chain_id,
+    fee: tx.value.fee,
+    memo: tx.value.memo,
+    msgs: tx.value.msg,
+    sequence: meta.sequence,
+  };
 }
 
 /**
@@ -193,16 +209,19 @@ export function createSignMsg (tx: Tx, meta: SignMeta): StdSignMsg {
  *
  * @returns a signature and corresponding public key
  */
-export function createSignature (signMsg: StdSignMsg, { privateKey, publicKey }: KeyPair): StdSignature {
-    const signatureBytes = createSignatureBytes(signMsg, privateKey);
+export function createSignature(
+  signMsg: StdSignMsg,
+  { privateKey, publicKey }: KeyPair
+): StdSignature {
+  const signatureBytes = createSignatureBytes(signMsg, privateKey);
 
-    return {
-        signature: bytesToBase64(signatureBytes),
-        pub_key:   {
-            type:  'tendermint/PubKeySecp256k1',
-            value: bytesToBase64(publicKey)
-        }
-    };
+  return {
+    signature: bytesToBase64(signatureBytes),
+    pub_key: {
+      type: 'tendermint/PubKeySecp256k1',
+      value: bytesToBase64(publicKey),
+    },
+  };
 }
 
 /**
@@ -213,10 +232,13 @@ export function createSignature (signMsg: StdSignMsg, { privateKey, publicKey }:
  *
  * @returns signature bytes
  */
-export function createSignatureBytes (signMsg: StdSignMsg, privateKey: Bytes): Bytes {
-    const bytes = toCanonicalJSONBytes(signMsg);
+export function createSignatureBytes(
+  signMsg: StdSignMsg,
+  privateKey: Bytes
+): Bytes {
+  const bytes = toCanonicalJSONBytes(signMsg);
 
-    return sign(bytes, privateKey);
+  return sign(bytes, privateKey);
 }
 
 /**
@@ -228,12 +250,12 @@ export function createSignatureBytes (signMsg: StdSignMsg, privateKey: Bytes): B
  * @returns signed hash of the bytes
  * @throws  will throw if the provided private key is invalid
  */
-export function sign (bytes: Bytes, privateKey: Bytes): Bytes {
-    const hash = sha256(bytes);
+export function sign(bytes: Bytes, privateKey: Bytes): Bytes {
+  const hash = sha256(bytes);
 
-    const { signature } = secp256k1Sign(hash, Buffer.from(privateKey));
+  const { signature } = secp256k1Sign(hash, Buffer.from(privateKey));
 
-    return signature;
+  return signature;
 }
 
 /**
@@ -244,10 +266,10 @@ export function sign (bytes: Bytes, privateKey: Bytes): Bytes {
  *
  * @returns `true` if all signatures are valid and match, `false` otherwise or if no signatures were provided
  */
-export function verifyTx (tx: StdTx, meta: SignMeta): boolean {
-    const signMsg = createSignMsg(tx, meta);
+export function verifyTx(tx: StdTx, meta: SignMeta): boolean {
+  const signMsg = createSignMsg(tx, meta);
 
-    return verifySignatures(signMsg, tx.signatures);
+  return verifySignatures(signMsg, tx.value.signatures);
 }
 
 /**
@@ -258,15 +280,17 @@ export function verifyTx (tx: StdTx, meta: SignMeta): boolean {
  *
  * @returns `true` if all signatures are valid and match, `false` otherwise or if no signatures were provided
  */
-export function verifySignatures (signMsg: StdSignMsg, signatures: StdSignature[]): boolean {
-    if (signatures.length > 0) {
-        return signatures.every(function (signature: StdSignature): boolean {
-            return verifySignature(signMsg, signature);
-        });
-    }
-    else {
-        return false;
-    }
+export function verifySignatures(
+  signMsg: StdSignMsg,
+  signatures: StdSignature[]
+): boolean {
+  if (signatures.length > 0) {
+    return signatures.every(function (signature: StdSignature): boolean {
+      return verifySignature(signMsg, signature);
+    });
+  } else {
+    return false;
+  }
 }
 
 /**
@@ -277,11 +301,14 @@ export function verifySignatures (signMsg: StdSignMsg, signatures: StdSignature[
  *
  * @returns `true` if the signature is valid and matches, `false` otherwise
  */
-export function verifySignature (signMsg: StdSignMsg, signature: StdSignature): boolean {
-    const signatureBytes = base64ToBytes(signature.signature);
-    const publicKey      = base64ToBytes(signature.pub_key.value);
+export function verifySignature(
+  signMsg: StdSignMsg,
+  signature: StdSignature
+): boolean {
+  const signatureBytes = base64ToBytes(signature.signature);
+  const publicKey = base64ToBytes(signature.pub_key.value);
 
-    return verifySignatureBytes(signMsg, signatureBytes, publicKey);
+  return verifySignatureBytes(signMsg, signatureBytes, publicKey);
 }
 
 /**
@@ -293,11 +320,15 @@ export function verifySignature (signMsg: StdSignMsg, signature: StdSignature): 
  *
  * @returns `true` if the signature is valid and matches, `false` otherwise
  */
-export function verifySignatureBytes (signMsg: StdSignMsg, signature: Bytes, publicKey: Bytes): boolean {
-    const bytes = toCanonicalJSONBytes(signMsg);
-    const hash  = sha256(bytes);
+export function verifySignatureBytes(
+  signMsg: StdSignMsg,
+  signature: Bytes,
+  publicKey: Bytes
+): boolean {
+  const bytes = toCanonicalJSONBytes(signMsg);
+  const hash = sha256(bytes);
 
-    return secp256k1Verify(hash, Buffer.from(signature), Buffer.from(publicKey));
+  return secp256k1Verify(hash, Buffer.from(signature), Buffer.from(publicKey));
 }
 
 /**
@@ -308,9 +339,12 @@ export function verifySignatureBytes (signMsg: StdSignMsg, signature: Bytes, pub
  *
  * @returns a transaction broadcast
  */
-export function createBroadcastTx (tx: StdTx, mode: BroadcastMode = BROADCAST_MODE_SYNC): BroadcastTx {
-    return {
-        tx,
-        mode
-    };
+export function createBroadcastTx(
+  tx: StdTx,
+  mode: BroadcastMode = BROADCAST_MODE_SYNC
+): BroadcastTx {
+  return {
+    tx,
+    mode,
+  };
 }

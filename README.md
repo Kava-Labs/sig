@@ -4,24 +4,25 @@ Sig is a signing library for Cosmos, supported in Node.js and browsers.
 
 Sig provides JavaScript functions and TypeScript types for
 
-  - Deriving a wallet (private key, public key, and address) from a mnemonic
-  - Deriving an address from a public key
-  - Structuring a transaction
-  - Signing a transaction
-  - Verifying signatures for a transaction
-  - Preparing a transaction for broadcast
+- Deriving a wallet (private key, public key, and address) from a mnemonic
+- Deriving an address from a public key
+- Structuring a transaction
+- Signing a transaction
+- Verifying signatures for a transaction
+- Preparing a transaction for broadcast
 
 Sig **does not** provide functions for
 
-  - Generating a mnemonic
-  - Storing keys or other secrets
-  - Obtaining data from a chain
-  - Broadcasting transactions
+- Generating a mnemonic
+- Storing keys or other secrets
+- Obtaining data from a chain
+- Broadcasting transactions
 
 Sig is designed to work well with other libraries like
-  - [`bip39`](https://github.com/bitcoinjs/bip39)
-  - [`bip32`](https://github.com/bitcoinjs/bip32)
-  - [`@tendermint/amino-js`](https://github.com/cosmos/amino-js)
+
+- [`bip39`](https://github.com/bitcoinjs/bip39)
+- [`bip32`](https://github.com/bitcoinjs/bip32)
+- [`@tendermint/amino-js`](https://github.com/cosmos/amino-js)
 
 Sig is experimental and not recommended for use in production yet. Please help us test and improve it!
 
@@ -29,8 +30,8 @@ As always, please be careful to protect any mnemonic phrases, passwords, and pri
 
 ### Demo
 
-  - [Node.js](https://repl.it/repls/DodgerblueAshamedTest)
-  - [Browser](https://jsfiddle.net/pbc6zkeh/)
+- [Node.js](https://repl.it/repls/DodgerblueAshamedTest)
+- [Browser](https://jsfiddle.net/pbc6zkeh/)
 
 ### Documentation
 
@@ -41,11 +42,13 @@ As always, please be careful to protect any mnemonic phrases, passwords, and pri
 Please note that the NPM package name is `@tendermint/sig` rather than `@cosmos/sig`.
 
 #### Yarn
+
 ```shell
 yarn add @tendermint/sig
 ```
 
 #### NPM
+
 ```shell
 npm install --save @tendermint/sig
 ```
@@ -57,7 +60,8 @@ npm install --save @tendermint/sig
 ```typescript
 import { createWalletFromMnemonic } from '@tendermint/sig';
 
-const mnemonic = 'trouble salon husband push melody usage fine ensure blade deal miss twin';
+const mnemonic =
+  'trouble salon husband push melody usage fine ensure blade deal miss twin';
 
 const wallet = createWalletFromMnemonic(mnemonic); // BIP39 mnemonic string
 /*
@@ -95,54 +99,73 @@ const address = createAddress(publicKey); // Buffer or Uint8Array
 import { signTx } from '@tendermint/sig';
 
 const tx = {
-    fee:  {
-        amount: [{ amount: '0', denom: '' }],
-        gas:    '10000'
-    },
-    memo: '',
-    msgs: [{
-        type:  'cosmos-sdk/Send',
+  type: 'cosmos-sdk/StdTx',
+  value: {
+    msg: [
+      {
+        type: 'cosmos-sdk/MsgSend',
         value: {
-            inputs:  [{
-                address: 'cosmos1qperwt9wrnkg5k9e5gzfgjppzpqhyav5j24d66',
-                coins:   [{ amount: '1', denom: 'STAKE' }]
-            }],
-            outputs: [{
-                address: 'cosmos1yeckxz7tapz34kjwnjxvmxzurerquhtrmxmuxt',
-                coins:   [{  amount: '1', denom: 'STAKE' }]
-            }]
-        }
-    }]
+          from_address: 'cosmos1qperwt9wrnkg5k9e5gzfgjppzpqhyav5j24d66',
+          to_address: 'cosmos1yeckxz7tapz34kjwnjxvmxzurerquhtrmxmuxt',
+          amount: [
+            {
+              denom: 'stake',
+              amount: '1',
+            },
+          ],
+        },
+      },
+    ],
+    fee: {
+      amount: [],
+      gas: '200000',
+    },
+    signatures: null,
+    memo: '',
+  },
 };
 
 const signMeta = {
-    account_number: '1',
-    chain_id:       'cosmos',
-    sequence:       '0'
+  account_number: '1',
+  chain_id: 'cosmos',
+  sequence: '0',
 };
 
 const stdTx = signTx(tx, signMeta, wallet); // Wallet or privateKey / publicKey pair; see example above
 /*
 {
-    fee:        { amount: [{ amount: '0', denom: '' }], gas: '10000' },
-    memo:       '',
-    msg:       [{
-        type:  'cosmos-sdk/Send',
-        value: {
-            inputs:  [{
-                'address': 'cosmos1qperwt9wrnkg5k9e5gzfgjppzpqhyav5j24d66',
-                'coins':   [{ amount: '1', denom: 'STAKE' }]
-            }],
-            outputs: [{
-                address: 'cosmos1yeckxz7tapz34kjwnjxvmxzurerquhtrmxmuxt',
-                coins:   [{ amount: '1', denom: 'STAKE' }]
-            }]
+  "type": "cosmos-sdk/StdTx",
+  "value": {
+    "msg": [
+      {
+        "type": "cosmos-sdk/MsgSend",
+        "value": {
+          "from_address": "cosmos1qperwt9wrnkg5k9e5gzfgjppzpqhyav5j24d66",
+          "to_address": "cosmos1yeckxz7tapz34kjwnjxvmxzurerquhtrmxmuxt",
+          "amount": [
+            {
+              "denom": "stake",
+              "amount": "1"
+            }
+          ]
         }
-    }],
-    signatures: [{
-        signature: 'uwQQzsubfzk/EwedKbZI/IDiXru5M6GuEBA2DZ+U7LVBwO80MFhU6ULA/5yjT8F0Bdx113VzS/GtbntazzNPwQ==',
-        pub_key:   { type: 'tendermint/PubKeySecp256k1', value: 'A58jKYIwA/eL8nEpyLBJG2boceJQuGuQ2ViXFRa5RBzT' }
-    }]
+      }
+    ],
+    "fee": {
+      "amount": [],
+      "gas": "200000"
+    },
+    "memo": "",
+    "signatures": [
+      {
+        "signature": "UA8vJJNInQ3ZujCdW2W31ID5julF404Zx63RIdeDXOtLQepwrO6W1mu3NRtd4HAce8PnYC5qQcjQ7vZUnmQ05A==",
+        "pub_key": {
+          "type": "tendermint/PubKeySecp256k1",
+          "value": "A58jKYIwA/eL8nEpyLBJG2boceJQuGuQ2ViXFRa5RBzT"
+        }
+      }
+    ]
+  }
 }
 */
 ```
