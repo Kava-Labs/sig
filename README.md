@@ -1,6 +1,6 @@
 # Sig
 
-Sig is a signing library for Cosmos, supported in Node.js and browsers.
+Sig is a signing library for Cosmos which we've modified for compatibility with Kava.
 
 Sig provides JavaScript functions and TypeScript types for
 
@@ -39,18 +39,18 @@ As always, please be careful to protect any mnemonic phrases, passwords, and pri
 
 ### Install
 
-Please note that the NPM package name is `@tendermint/sig` rather than `@cosmos/sig`.
+Please note that the NPM package name is `@kava/sig` rather than `@cosmos/sig`.
 
 #### Yarn
 
 ```shell
-yarn add @tendermint/sig
+yarn add @kava/sig
 ```
 
 #### NPM
 
 ```shell
-npm install --save @tendermint/sig
+npm install --save @kava/sig
 ```
 
 ### Usage
@@ -58,7 +58,7 @@ npm install --save @tendermint/sig
 #### Derive a wallet (private key, public key, and address) from a mnemonic
 
 ```typescript
-import { createWalletFromMnemonic } from '@tendermint/sig';
+import { createWalletFromMnemonic } from '@kava/sig';
 
 const mnemonic =
   'trouble salon husband push melody usage fine ensure blade deal miss twin';
@@ -87,7 +87,7 @@ const wallet = createWalletFromMnemonic(mnemonic); // BIP39 mnemonic string
 #### Derive a Bech32 address from a public key
 
 ```typescript
-import { createAddress } from '@tendermint/sig';
+import { createAddress } from '@kava/sig';
 
 const address = createAddress(publicKey); // Buffer or Uint8Array
 // 'cosmos1asm039pzjkkg9ghlvj267p5g3whtxd2t4leg5c'
@@ -96,7 +96,7 @@ const address = createAddress(publicKey); // Buffer or Uint8Array
 #### Sign a transaction
 
 ```typescript
-import { signTx } from '@tendermint/sig';
+import { signTx } from '@kava/sig';
 
 const tx = {
   type: 'cosmos-sdk/StdTx',
@@ -127,7 +127,7 @@ const tx = {
 
 const signMeta = {
   account_number: '1',
-  chain_id: 'cosmos',
+  chain_id: 'testing',
   sequence: '0',
 };
 
@@ -173,7 +173,7 @@ const stdTx = signTx(tx, signMeta, wallet); // Wallet or privateKey / publicKey 
 #### Verify a transaction
 
 ```typescript
-import { verifyTx } from '@tendermint/sig';
+import { verifyTx } from '@kava/sig';
 
 const valid = verifyTx(stdTx, signMeta); // signed transaction and metadata; see example above
 // true
@@ -184,7 +184,7 @@ Please see the [documentation](https://cosmos.github.io/sig/) for the full API.
 ### Building
 
 ```shell
-git clone https://github.com/cosmos/sig.git
+git clone https://github.com/kava-labs/sig.git
 cd sig
 yarn install
 yarn setup
