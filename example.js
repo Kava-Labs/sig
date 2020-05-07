@@ -1,4 +1,4 @@
-const sig = require('.');
+import sig from '.';
 
 const mnemonic = "trouble salon husband push melody usage fine ensure blade deal miss twin"
 const wallet = sig.createWalletFromMnemonic(mnemonic);
