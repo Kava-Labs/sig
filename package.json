@@ -1,10 +1,10 @@
 {
-    "name": "@tendermint/sig",
-    "description": "A signing library for Cosmos",
+    "name": "@kava/sig",
+    "description": "A signing library for Kava",
     "license": "Apache-2.0",
     "repository": {
         "type": "git",
-        "url": "https://github.com/cosmos/sig.git"
+        "url": "https://github.com/kava-labs/sig.git"
     },
     "publishConfig": {
         "access": "public"
@@ -12,7 +12,7 @@
     "engines": {
         "node": ">=10"
     },
-    "version": "0.4.1",
+    "version": "0.1.0",
     "main": "index.js",
     "scripts": {
         "build": "rm -rf dist/* && webpack --config build --progress --colors --display-error-details",
