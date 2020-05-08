@@ -39,18 +39,18 @@ As always, please be careful to protect any mnemonic phrases, passwords, and pri
 
 ### Install
 
-Please note that the NPM package name is `@kava/sig` rather than `@cosmos/sig`.
+Please note that the NPM package name is `@kava-labs/sig` rather than `@cosmos/sig`.
 
 #### Yarn
 
 ```shell
-yarn add @kava/sig
+yarn add @kava-labs/sig
 ```
 
 #### NPM
 
 ```shell
-npm install --save @kava/sig
+npm install --save @kava-labs/sig
 ```
 
 ### Usage
@@ -58,7 +58,7 @@ npm install --save @kava/sig
 #### Derive a wallet (private key, public key, and address) from a mnemonic
 
 ```typescript
-import { createWalletFromMnemonic } from '@kava/sig';
+import { createWalletFromMnemonic } from '@kava-labs/sig';
 
 const mnemonic =
   'trouble salon husband push melody usage fine ensure blade deal miss twin';
@@ -87,7 +87,7 @@ const wallet = createWalletFromMnemonic(mnemonic); // BIP39 mnemonic string
 #### Derive a Bech32 address from a public key
 
 ```typescript
-import { createAddress } from '@kava/sig';
+import { createAddress } from '@kava-labs/sig';
 
 const address = createAddress(publicKey); // Buffer or Uint8Array
 // 'cosmos1asm039pzjkkg9ghlvj267p5g3whtxd2t4leg5c'
@@ -96,7 +96,7 @@ const address = createAddress(publicKey); // Buffer or Uint8Array
 #### Sign a transaction
 
 ```typescript
-import { signTx } from '@kava/sig';
+import { signTx } from '@kava-labs/sig';
 
 const tx = {
   type: 'cosmos-sdk/StdTx',
@@ -173,7 +173,7 @@ const stdTx = signTx(tx, signMeta, wallet); // Wallet or privateKey / publicKey 
 #### Verify a transaction
 
 ```typescript
-import { verifyTx } from '@kava/sig';
+import { verifyTx } from '@kava-labs/sig';
 
 const valid = verifyTx(stdTx, signMeta); // signed transaction and metadata; see example above
 // true

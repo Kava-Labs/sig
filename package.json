@@ -1,5 +1,5 @@
 {
-    "name": "@kava/sig",
+    "name": "@kava-labs/sig",
     "description": "A signing library for Kava",
     "license": "Apache-2.0",
     "repository": {
